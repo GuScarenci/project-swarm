@@ -1,0 +1,65 @@
+# ----------------- VARIÁVEIS DE CONFIGURAÇÃO -----------------
+# Defina o número de transações e a taxa de TPS aqui.
+# Estes valores serão reutilizados nas seções abaixo.
+variables:
+  transaction_count: &tx_count 10000
+  transactions_per_second: &tps_rate 200
+# -------------------------------------------------------------
+
+test:
+  name: testecouch-benchmark
+  workers:
+    type: local
+    number: 1
+  rounds:
+    - label: insertPatient
+      description: "Test transaction submission for insertPatient"
+      txNumber: *tx_count # Usa a variável tx_count
+      rateControl: { type: 'fixed-rate', opts: { tps: *tps_rate } } # Usa a variável tps_rate
+      workload:
+        module: insertPatient.js
+        arguments:
+          contractId: testecouch
+
+    - label: insertDitem
+      description: "Test transaction submission for insertDitem"
+      txNumber: *tx_count # Usa a variável tx_count
+      rateControl: { type: 'fixed-rate', opts: { tps: *tps_rate } } # Usa a variável tps_rate
+      workload:
+        module: insertDitem.js
+        arguments:
+          contractId: testecouch
+
+    - label: insertPrescription
+      description: "Test transaction submission for insertPrescription"
+      txNumber: *tx_count # Usa a variável tx_count
+      rateControl: { type: 'fixed-rate', opts: { tps: *tps_rate } } # Usa a variável tps_rate
+      workload:
+        module: insertPrescription.js
+        arguments:
+          contractId: testecouch
+
+    - label: insertInputeventMv
+      description: "Test transaction submission for insertInputeventMv"
+      txNumber: *tx_count # Usa a variável tx_count
+      rateControl: { type: 'fixed-rate', opts: { tps: *tps_rate } } # Usa a variável tps_rate
+      workload:
+        module: insertInputeventMv.js
+        arguments:
+          contractId: testecouch
+
+    - label: queryPatientById
+      description: "Test query transaction for queryPatientById"
+      txNumber: *tx_count # Usa a variável tx_count
+      rateControl: { type: 'fixed-rate', opts: { tps: *tps_rate } } # Usa a variável tps_rate
+      workload:
+        module: queryPatientId.js
+        arguments:
+          contractId: testecouch
+monitor:
+  type:
+  - docker
+  docker:
+    names:
+    - all
+  interval: 1
