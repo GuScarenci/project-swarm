@@ -1299,29 +1299,31 @@ peer lifecycle chaincode install testecouch.tar.gz
 peer lifecycle chaincode queryinstalled
 # Copie o Package ID, será algo como: mimic_1:xxxxxxxx
 export CC_PACKAGE_ID=[COLE_O_PACKAGE_ID_AQUI]
+```
 
-# Aprove para Org2 (já estamos no contexto dela)
-peer lifecycle chaincode approveformyorg -o orderer.example.com:7050 --tls \
---cafile $ORDERER_CA --channelID mychannel --name mimic --version 1.0 \
---sequence 1 --waitForEvent
+# APROVE E FAÇA O COMMIT
 
-# Mude para Org1 e aprove
-export CORE_PEER_LOCALMSPID=Org1MSP
-export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
-export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
-export CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-peer lifecycle chaincode approveformyorg -o orderer.example.com:7050 --tls \
---cafile $ORDERER_CA --channelID mychannel --name mimic --version 1.0 \
---sequence 1 --waitForEvent
+```
+peer lifecycle chaincode approveformyorg -o orderer:7050 --tls \
+--cafile $ORDERER_CA --channelID mychannel --name testecouch \
+--version 1.0 --sequence 1 --waitForEvent \
+--package-id $CC_PACKAGE_ID \
+--signature-policy "OR('Org1MSP.peer', 'Org2MSP.peer')" \
+--ordererTLSHostnameOverride orderer.example.com
 
-# Verifique se está pronto para commit
-peer lifecycle chaincode checkcommitreadiness --channelID mychannel --name mimic --version 1.0 --sequence 1 --output json
+peer lifecycle chaincode approveformyorg -o orderer:7050 --tls \
+--cafile $ORDERER_CA --channelID mychannel --name testecouch \
+--version 1.0 --sequence 1 --waitForEvent \
+--package-id $CC_PACKAGE_ID \
+--signature-policy "OR('Org1MSP.peer', 'Org2MSP.peer')" \
+--ordererTLSHostnameOverride orderer.example.com
 
-# Faça o commit
-peer lifecycle chaincode commit -o orderer.example.com:7050 --tls \
---cafile $ORDERER_CA --channelID mychannel --name mimic --version 1.0 --sequence 1 \
---peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
---peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+peer lifecycle chaincode commit -o orderer:7050 --tls \
+--cafile $ORDERER_CA --channelID mychannel --name testecouch --version 1.0 --sequence 1 \
+--signature-policy "OR('Org1MSP.peer', 'Org2MSP.peer')" \
+--peerAddresses peer0-org1:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--ordererTLSHostnameOverride orderer.example.com
+
 ```
 
 
